@@ -14,12 +14,12 @@ MojoX::Log::Dispatch - Log::Dispatch For Mojo
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 
 __PACKAGE__->attr(
@@ -59,6 +59,7 @@ __PACKAGE__->attr(
 
 __PACKAGE__->attr('callbacks');
 __PACKAGE__->attr('remove_default_log_obj', 'default' => 1);
+
 
 sub dispatcher { return shift->handle }
 
@@ -133,7 +134,8 @@ __END__
 
     use MojoX::Log::Dispatch;
 
-    # Create a Log::Dispatch whith logging object that will log to STDERR by default or to file if exists attribute C<path>
+    # Create a Log::Dispatch whith logging object that will log to STDERR by default
+    # or to file if exists attribute path
     
     my $log = MojoX::Log::Dispatch->new();
 
@@ -164,6 +166,28 @@ __END__
     
     #OR:
     $log->log('debug' => 'This should work');
+    
+    
+    #In your Mojo App
+    # create a custom logger object for Mojo/Mojolicious to use
+    # (this is usually done inside the "startup" sub on Mojolicious).
+    
+    use MojoX::Log::Dispatch;
+    use Log::Dispatch::Syslog;
+    
+    my $dispatch = MojoX::Log::Dispatch->new('path' => '/home/green/tmp/mySupEr.log',
+                                             'remove_default_log_obj' => 0);
+	
+	$dispatch->add(Log::Dispatch::Syslog->new( name      => 'logsys',
+                                               min_level => 'debug',
+                                               ident     => 'MyMojo::App',
+                                               facility  => 'local0' )
+											);
+	$self->log($dispatch);
+	
+	#and then
+	$self->log->debug("Why isn't this working?");										
+    
     
 
 =head1 DESCRIPTION
@@ -331,164 +355,7 @@ Returns a Log::Dispatch object
 L<MojoX::Log::Dispatch> inherits all methods from L<Mojo::Log> and implements the
 following new ones.
 
-=head2 C<debug>
-
-    $log = $log->debug('You screwed up, but thats ok');
-
-=head2 C<error>
-
-    $log = $log->error('You really screwed up this time');
-
-=head2 C<err>
-
-    $log = $log->err('You really screwed up this time');
-
-
-=head2 C<fatal>
-
-    $log = $log->fatal('Its over...');
-
-=head2 C<info>
-
-    $log = $log->info('You are bad, but you prolly know already');
-    
-=head2 C<warn>
-
-    $log = $log->warn('Dont do that Dave...');
- 
-=head2 C<emergency>
-
-    $log = $log->emergency("Boom! Boom!");;
- 
-=head2 C<emerg>
-
-    $log = $log->emerg("Boom! Boom!");;
- 
- 
-=head2 C<alert>
-
-    $log = $log->alert("Hello!");;
- 
-
-=head2 C<critical>
-
-    $log = $log->critical("This might be a BIG problem");
- 
-
-=head2 C<crit>
-
-    $log = $log->crit("This might be a BIG problem");
- 
- 
-=head2 C<warning>
-
-    $log = $log->warning("This might be a problem");
- 
-=head2 C<warn>
-
-    $log = $log->warn("This might be a problem");
- 
-  
-=head2 C<notice>
-
-    $log = $log->notice('it happened again');
- 
- 
-=head2 C<is_level>
-
-    my $is = $log->is_level('debug');
-
-Returns true if the current logging level is at or above this level. 
-
-=head2 C<is_debug>
-
-    my $is = $log->is_debug;
-    
-Returns true if the current logging level is at or above this level.     
-
-=head2 C<is_error>
-
-    my $is = $log->is_error;
-    
-Returns true if the current logging level is at or above this level.     
-
-=head2 C<is_fatal>
-
-    my $is = $log->is_fatal;
-    
-Returns true if the current logging level is at or above this level.     
-
-=head2 C<is_info>
-
-    my $is = $log->is_info;
-    
-Returns true if the current logging level is at or above this level.     
-
-
-=head2 C<is_notice>
-
-    my $is = $log->is_notice;
-    
-Returns true if the current logging level is at or above this level.     
-
-=head2 C<is_warn>
-
-    my $is = $log->is_warn;
-    
-Returns true if the current logging level is at or above this level.     
-    
-=head2 C<is_emergency>
-
-    my $is = $log->is_emergency;
-
-Returns true if the current logging level is at or above this level. 
-
-=head2 C<is_emerg>
-
-    my $is = $log->is_emerg;
-
-Returns true if the current logging level is at or above this level. 
-
-
-=head2 C<is_alert>
-
-    my $is = $log->is_alert;
-
-Returns true if the current logging level is at or above this level. 
-
-=head2 C<is_critical>
-
-    my $is = $log->is_critical;
-
-Returns true if the current logging level is at or above this level. 
-
-=head2 C<is_warning>
-
-    my $is = $log->is_warning;
-
-Returns true if the current logging level is at or above this level.    
-    
-
-=head2 C<is_err>
-
-    my $is = $log->is_err;
-
-Returns true if the current logging level is at or above this level.    
-
-=head2 C<is_crit>
-
-    my $is = $log->is_crit;
-
-Returns true if the current logging level is at or above this level.    
-
-=head2 C<is_emerg>
-
-    my $is = $log->is_emerg;
-
-Returns true if the current logging level is at or above this level. 
-
-
-=head1 Log Levels
+=head1 LOG LEVELS
 
 The log levels that Log::Dispatch (and MojoX::Log::Dispatch) uses are taken directly from the
 syslog man pages (except that I expanded them to full words).  Valid
@@ -517,6 +384,165 @@ levels are:
 The syslog standard of 'err', 'crit', and 'emerg'
 is also acceptable.
 
+
+=head2 C<debug>
+
+    $log = $log->debug('You screwed up, but thats ok');
+
+
+=head2 C<info>
+
+    $log = $log->info('You are bad, but you prolly know already');
+    
+
+=head2 C<notice>
+
+    $log = $log->notice('it happened again');
+ 
+=head2 C<warning>
+
+    $log = $log->warning("This might be a problem");
+ 
+=head2 C<warn>
+
+    $log = $log->warn("This might be a problem");
+ 
+
+=head2 C<error>
+
+    $log = $log->error('You really screwed up this time');
+
+=head2 C<err>
+
+    $log = $log->err('You really screwed up this time');
+
+
+=head2 C<critical>
+
+    $log = $log->critical("This might be a BIG problem");
+ 
+
+=head2 C<crit>
+
+    $log = $log->crit("This might be a BIG problem");
+ 
+=head2 C<alert>
+
+    $log = $log->alert("Hello!");;
+ 
+
+
+=head2 C<fatal>
+
+    $log = $log->fatal('Its over...');
+
+
+=head2 C<emergency>
+
+    $log = $log->emergency("Boom! Boom!");;
+ 
+=head2 C<emerg>
+
+    $log = $log->emerg("Boom! Boom!");;
+ 
+
+=head1 CHEKING LOG LEVELS 
+
+=head2 C<is_level>
+
+    my $is = $log->is_level('debug');
+
+Returns true if the current logging level is at or above this level. 
+
+=head2 C<is_debug>
+
+    my $is = $log->is_debug;
+    
+Returns true if the current logging level is at or above this level.     
+
+
+=head2 C<is_info>
+
+    my $is = $log->is_info;
+    
+Returns true if the current logging level is at or above this level.     
+
+
+=head2 C<is_notice>
+
+    my $is = $log->is_notice;
+    
+Returns true if the current logging level is at or above this level.     
+
+
+=head2 C<is_warn>
+
+    my $is = $log->is_warn;
+    
+Returns true if the current logging level is at or above this level.     
+    
+
+=head2 C<is_warning>
+
+    my $is = $log->is_warning;
+
+Returns true if the current logging level is at or above this level.    
+    
+
+=head2 C<is_error>
+
+    my $is = $log->is_error;
+    
+Returns true if the current logging level is at or above this level.     
+
+
+=head2 C<is_err>
+
+    my $is = $log->is_err;
+
+Returns true if the current logging level is at or above this level.    
+
+
+=head2 C<is_critical>
+
+    my $is = $log->is_critical;
+
+Returns true if the current logging level is at or above this level. 
+
+
+=head2 C<is_crit>
+
+    my $is = $log->is_crit;
+
+Returns true if the current logging level is at or above this level.    
+
+
+=head2 C<is_alert>
+
+    my $is = $log->is_alert;
+
+Returns true if the current logging level is at or above this level. 
+
+
+=head2 C<is_fatal>
+
+    my $is = $log->is_fatal;
+    
+Returns true if the current logging level is at or above this level.     
+
+=head2 C<is_emergency>
+
+    my $is = $log->is_emergency;
+
+Returns true if the current logging level is at or above this level. 
+
+=head2 C<is_emerg>
+
+    my $is = $log->is_emerg;
+
+Returns true if the current logging level is at or above this level. 
+
+
 =head1 See Also
 
 Log::Dispatch
@@ -533,7 +559,12 @@ Log::Dispatch::Output,
 Log::Dispatch::Screen,
 Log::Dispatch::Syslog
 
-and more othe Log::Dispatch::* modules L<http://search.cpan.org/search?m=dist&q=Log%3A%3ADispatch>
+and more others Log::Dispatch::* modules L<http://search.cpan.org/search?m=dist&q=Log%3A%3ADispatch>
+
+
+=head2 Other Mojo loggers
+
+MojoX::Log::Log4perl, Mojo::Log 
 
 
 =head1 AUTHOR

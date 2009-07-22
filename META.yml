@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               MojoX-Log-Dispatch
-version:            0.05
+version:            0.06
 abstract:           Log::Dispatch For Mojo
 author:
     - Konstantin Kapitanov <perlovik@gmail.com>
@@ -12,6 +12,7 @@ build_requires:
     ExtUtils::MakeMaker:  0
 requires:
     Log::Dispatch:  2.22
+    Mojo:           0.991232
     Test::More:     0
 no_index:
     directory:
