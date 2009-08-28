@@ -19,12 +19,11 @@ Version 0.06
 =cut
 
 
-our $VERSION = '0.06';
+our $VERSION = '0.1';
 
 
 __PACKAGE__->attr(
-    'handle',
-    default => sub {
+    'handle' => sub {
         my $self = shift;
 		my $dispatcher;
 		if ($self->callbacks)
@@ -58,7 +57,7 @@ __PACKAGE__->attr(
 );
 
 __PACKAGE__->attr('callbacks');
-__PACKAGE__->attr('remove_default_log_obj', 'default' => 1);
+__PACKAGE__->attr('remove_default_log_obj' => 1);
 
 
 sub dispatcher { return shift->handle }
@@ -181,8 +180,8 @@ __END__
 	$dispatch->add(Log::Dispatch::Syslog->new( name      => 'logsys',
                                                min_level => 'debug',
                                                ident     => 'MyMojo::App',
-                                               facility  => 'local0' )
-											);
+                                               facility  => 'local0' 
+                                               ));
 	$self->log($dispatch);
 	
 	#and then
